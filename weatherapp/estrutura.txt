@@ -1,0 +1,18 @@
+weatherapp/
+│
+├── app/
+│   ├── api/                   # Roteadores das APIs
+│   ├── services/              # Serviços de requisição à WeatherAPI
+│   ├── templates/             # HTML com Jinja2
+│   ├── static/                # CSS, JS, ícones
+│   └── routes.py              # Rotas principais
+│
+├── data/
+│   └── capitais_brasil.json   # Lista com lat/lon das capitais
+│
+├── tests/
+│   └── test_api.py
+│
+├── run.py                     # Executa o app Flask
+├── requirements.txt
+└── .env                       # Contém sua API_KEY
