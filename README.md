@@ -63,6 +63,24 @@ Além disso, o projeto serve como base para aprendizado prático sobre:
 - 📄 Tratamento e exibição de dados JSON em front-end
 - 🚀 Boas práticas de organização de código e arquivos
 
+## 🚀 Funcionalidades
+Este sistema de previsão do tempo permite que o usuário:
+
+- 🔍 Selecione o estado (UF) e município de interesse em listas dinâmicas (dependentes).
+- 📍 Visualize dados meteorológicos atuais para o município escolhido, incluindo:
+- Temperatura, umidade, sensação térmica, velocidade do vento, e condição do céu (ensolarado, nublado, etc.).
+
+📅 Veja a previsão para os próximos 5 dias, com:
+- Temperaturas máximas e mínimas,
+- Ícones e descrições das condições do tempo,
+- Informações por data.
+- 🌐 Consuma dados diretamente da API WeatherAPI com base nas coordenadas geográficas reais do município.
+-🗺️ Utiliza arquivos locais estados.json e municipios.json para:
+
+Garantir maior velocidade na navegação, Evitar chamadas desnecessárias à API.
+- 💡 Interface leve com HTML + CSS puro (via Jinja2) com integração via Flask.
+- 📁 Estrutura modular de fácil manutenção com separação entre frontend, serviços, dados e rotas.
+
 ## 🧪 Exemplo de Uso
 
 https://github.com/user-attachments/assets/ac91025b-daf2-44bf-b321-98b088326127
