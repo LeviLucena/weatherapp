@@ -1,163 +1,200 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
     <meta charset="UTF-8" />
-    <title>Previsão do Tempo</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Previsão do Tempo - WeatherApp</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet" />
 </head>
 
-<body class="bg-light text-dark">
-    <!-- Logo centralizada -->
-    <div style="text-align: center; margin-bottom: 20px;">
-        <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" style="height: 200px;">
-    </div>
+<body>
+    <div class="container">
+        <header class="header">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="WeatherApp Logo">
+            <h1>Previsão do Tempo nos Municípios Brasileiros</h1>
+            <p>Consulte as condições climáticas em tempo real e previsões para qualquer cidade do Brasil</p>
+        </header>
 
-    <div class="container mt-5">
-        <h1 class="text-center mb-4">
-            <i class="bi bi-cloud-sun"></i> Previsão do Tempo nos Municípios Brasileiros
-        </h1>
+        <div class="form-container">
+            <form method="POST" action="{{ url_for('main.home') }}">
+                <div class="form-group">
+                    <label for="estado" class="form-label">Selecione o estado:</label>
+                    <select id="estado" name="estado" class="form-select" required>
+                        <option value="" disabled selected>Selecione um estado</option>
+                        {% for estado in estados %}
+                        <option value="{{ estado.codigo_uf }}" {% if estado.codigo_uf==estado_selecionado %}selected{% endif %}>
+                            {{ estado.nome }} ({{ estado.uf }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
 
-        <form method="POST" action="{{ url_for('main.home') }}">
-            <div class="mb-3">
-                <label for="estado" class="form-label">Selecione o estado:</label>
-                <select id="estado" name="estado" class="form-select" required>
-                    <option value="" disabled selected>Selecione um estado</option>
-                    {% for estado in estados %}
-                    <option value="{{ estado.codigo_uf }}" {% if estado.codigo_uf==estado_selecionado %}selected{% endif
-                        %}>{{ estado.nome }}</option>
-                    {% endfor %}
-                </select>
-            </div>
+                <div class="form-group">
+                    <label for="municipio" class="form-label">Selecione o município:</label>
+                    <select id="municipio" name="municipio" class="form-select" required>
+                        <option value="" disabled selected>Selecione um município</option>
+                        {% if municipios %}
+                        {% for m in municipios %}
+                        <option value="{{ m.nome }}" {% if m.nome==municipio_selecionado %}selected{% endif %}>
+                            {{ m.nome }}
+                        </option>
+                        {% endfor %}
+                        {% endif %}
+                    </select>
+                </div>
 
-            <div class="mb-3">
-                <label for="municipio" class="form-label">Selecione o município:</label>
-                <select id="municipio" name="municipio" class="form-select" required>
-                    <option value="" disabled selected>Selecione um município</option>
-                    {% if municipios %}
-                    {% for m in municipios %}
-                    <option value="{{ m.nome }}" {% if m.nome==municipio_selecionado %}selected{% endif %}>{{ m.nome }}
-                    </option>
-                    {% endfor %}
-                    {% endif %}
-                </select>
-            </div>
+                <button type="submit" class="btn-submit">
+                    <i class="bi bi-search"></i> Ver Clima e Previsão
+                </button>
+            </form>
+        </div>
 
-            <button type="submit" class="btn btn-primary w-100">Ver Clima e Previsão</button>
-        </form>
-
-        <script>
-            document.getElementById('estado').addEventListener('change', function () {
-                const codigoUf = this.value;
-                const municipioSelect = document.getElementById('municipio');
-                municipioSelect.innerHTML = '<option disabled selected>Carregando...</option>';
-
-                fetch(`/municipios/${codigoUf}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        municipioSelect.innerHTML = '<option disabled selected>Selecione um município</option>';
-                        data.forEach(municipio => {
-                            const option = document.createElement('option');
-                            option.value = municipio;
-                            option.textContent = municipio;
-                            municipioSelect.appendChild(option);
-                        });
-                    })
-                    .catch(() => {
-                        municipioSelect.innerHTML = '<option disabled selected>Erro ao carregar municípios</option>';
-                    });
-            });
-
-            // Caso tenha estado selecionado ao carregar a página, dispara o evento para carregar municípios
-            window.addEventListener('load', () => {
-                const estadoSelect = document.getElementById('estado');
-                if (estadoSelect.value) {
-                    estadoSelect.dispatchEvent(new Event('change'));
-                }
-            });
-        </script>
-
-        {% if weather %}
-        <div class="card mb-4">
+        {% if weather and 'current' in weather %}
+        <div class="card">
             <div class="card-header">
-                <h3>Clima Atual em {{ municipio_selecionado }}</h3>
+                <h3>Clima Atual em {{ municipio_selecionado }}, {{ estado_selecionado_nome }}</h3>
             </div>
             <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <p><strong>Temperatura:</strong> {{ weather['current']['temp_c'] }} °C</p>
-                        <p><strong>Temperatura (°F):</strong> {{ weather['current']['temp_f'] }} °F</p>
-                        <p><strong>Sensação Térmica:</strong> {{ weather['current']['feelslike_c'] }} °C</p>
-                        <p><strong>Sensação Térmica (°F):</strong> {{ weather['current']['feelslike_f'] }} °F</p>
-                        <p><strong>Condição:</strong> {{ weather['current']['condition']['text'] }}</p>
-                        <p><strong>Umidade:</strong> {{ weather['current']['humidity'] }}%</p>
-                        <p><strong>Índice UV:</strong> {{ weather['current']['uv'] }}</p>
-                        <p><strong>Pressão Atmosférica:</strong> {{ weather['current']['pressure_mb'] }} mb</p>
-                        <p><strong>Visibilidade:</strong> {{ weather['current']['vis_km'] }} km</p>
+                <div class="current-weather">
+                    <div class="current-temp">
+                        <img src="https:{{ weather['current']['condition']['icon'] }}" alt="{{ weather['current']['condition']['text'] }}" class="weather-icon">
+                        <div class="temp-value">{{ weather['current']['temp_c'] }}°C</div>
+                        <div class="condition-text">{{ weather['current']['condition']['text'] }}</div>
+                        <div class="feels-like">Sensação térmica: {{ weather['current']['feelslike_c'] }}°C</div>
                     </div>
-                    <div class="col-md-6">
-                        <p><strong>Vento:</strong> {{ weather['current']['wind_kph'] }} km/h ({{
-                            weather['current']['wind_dir'] }})</p>
-                        <p><strong>Direção do Vento (graus):</strong> {{ weather['current']['wind_degree'] }}°</p>
-                        <p><strong>Ícone:</strong> <img src="https:{{ weather['current']['condition']['icon'] }}"
-                                alt="condição" /></p>
-                        <p><strong>Nuvens:</strong> {{ weather['current']['cloud'] }}%</p>
-                        <p><strong>Atualizado em:</strong> {{ weather['current']['last_updated'] }}</p>
+                    
+                    <div class="weather-details">
+                        <div class="detail-item">
+                            <div class="detail-label">Umidade</div>
+                            <div class="detail-value">{{ weather['current']['humidity'] }}%</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Vento</div>
+                            <div class="detail-value">{{ weather['current']['wind_kph'] }} km/h</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Direção do Vento</div>
+                            <div class="detail-value">{{ weather['current']['wind_dir'] }}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Pressão</div>
+                            <div class="detail-value">{{ weather['current']['pressure_mb'] }} mb</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Visibilidade</div>
+                            <div class="detail-value">{{ weather['current']['vis_km'] }} km</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Índice UV</div>
+                            <div class="detail-value">{{ weather['current']['uv'] }}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Nuvens</div>
+                            <div class="detail-value">{{ weather['current']['cloud'] }}%</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Atualizado em</div>
+                            <div class="detail-value">{{ weather['current']['last_updated'] }}</div>
+                        </div>
                     </div>
                 </div>
+            </div>
+        </div>
+        {% elif weather and 'error' in weather %}
+        <div class="card">
+            <div class="card-header">
+                <h3>Erro ao obter dados climáticos</h3>
+            </div>
+            <div class="card-body">
+                <p class="text-danger">Ocorreu um erro ao buscar os dados climáticos: {{ weather['error'] }}</p>
+                {% if '401' in weather['error'] %}
+                <p>Erro 401: Chave de API inválida ou não autorizada. Por favor, verifique sua chave de API no arquivo .env.</p>
+                <p>Para obter uma chave válida, visite: <a href="https://www.weatherapi.com/signup.aspx" target="_blank">https://www.weatherapi.com/signup.aspx</a></p>
+                {% else %}
+                <p>Por favor, verifique sua chave de API e tente novamente.</p>
+                {% endif %}
             </div>
         </div>
         {% endif %}
 
         {% if forecast %}
-        <div class="card mb-4">
+        <div class="card">
             <div class="card-header">
-                <h3>Dados Astronômicos - {{ forecast[0].date }}</h3>
+                <h3>Dados Astronômicos - {{ municipio_selecionado }}</h3>
             </div>
-            <div class="card-body row">
-                <div class="col-md-6">
-                    <p><strong>Nascer do Sol:</strong> {{ forecast[0]['astro']['sunrise'] }}</p>
-                    <p><strong>Pôr do Sol:</strong> {{ forecast[0]['astro']['sunset'] }}</p>
-                    <p><strong>Fase da Lua:</strong> {{ forecast[0]['astro']['moon_phase'] }}</p>
+            <div class="card-body">
+                {% if forecast and forecast[0] and 'astro' in forecast[0] %}
+                <div class="astronomy-grid">
+                    <div class="astronomy-item">
+                        <div class="astronomy-label">Nascer do Sol</div>
+                        <div class="astronomy-value">{{ forecast[0]['astro']['sunrise'] }}</div>
+                    </div>
+                    <div class="astronomy-item">
+                        <div class="astronomy-label">Pôr do Sol</div>
+                        <div class="astronomy-value">{{ forecast[0]['astro']['sunset'] }}</div>
+                    </div>
+                    <div class="astronomy-item">
+                        <div class="astronomy-label">Nascer da Lua</div>
+                        <div class="astronomy-value">{{ forecast[0]['astro']['moonrise'] }}</div>
+                    </div>
+                    <div class="astronomy-item">
+                        <div class="astronomy-label">Pôr da Lua</div>
+                        <div class="astronomy-value">{{ forecast[0]['astro']['moonset'] }}</div>
+                    </div>
+                    <div class="astronomy-item">
+                        <div class="astronomy-label">Fase da Lua</div>
+                        <div class="astronomy-value">{{ forecast[0]['astro']['moon_phase'] }}</div>
+                    </div>
+                    <div class="astronomy-item">
+                        <div class="astronomy-label">Iluminação da Lua</div>
+                        <div class="astronomy-value">{{ forecast[0]['astro']['moon_illumination'] }}%</div>
+                    </div>
                 </div>
-                <div class="col-md-6">
-                    <p><strong>Nascer da Lua:</strong> {{ forecast[0]['astro']['moonrise'] }}</p>
-                    <p><strong>Pôr da Lua:</strong> {{ forecast[0]['astro']['moonset'] }}</p>
-                    <p><strong>Iluminação da Lua:</strong> {{ forecast[0]['astro']['moon_illumination'] }}%</p>
-                </div>
+                {% else %}
+                <p class="text-warning">Dados astronômicos não disponíveis para esta localização.</p>
+                {% endif %}
             </div>
         </div>
 
         <div class="card">
             <div class="card-header">
-                <h3>Previsão para os Próximos Dias</h3>
+                <h3>Previsão para os Próximos Dias - {{ municipio_selecionado }}</h3>
             </div>
             <div class="card-body">
-                <div class="row">
+                <div class="forecast-container">
                     {% for day in forecast %}
-                    <div class="col-md-3 mb-4">
-                        <div class="card h-100 text-center">
-                            <div class="card-body">
-                                <h5 class="card-title">{{ day.date }}</h5>
-                                <img src="https:{{ day.day.condition.icon }}" alt="{{ day.day.condition.text }}">
-                                <p class="mb-0"><strong>Máx:</strong> {{ day.day.maxtemp_c }} °C</p>
-                                <p><strong>Mín:</strong> {{ day.day.mintemp_c }} °C</p>
-                                <p>{{ day.day.condition.text }}</p>
-                                <p><strong>Chance de Chuva:</strong> {{ day.day.daily_chance_of_rain }}%</p>
-                                <p><strong>Chance de Neve:</strong> {{ day.day.daily_chance_of_snow }}%</p>
-                                <p><strong>Precipitação:</strong> {{ day.day.totalprecip_mm }} mm</p>
-                                <p><strong>Umidade Média:</strong> {{ day.day.avghumidity }}%</p>
-                                <p><strong>Índice UV:</strong> {{ day.day.uv }}</p>
-                            </div>
+                    {% if day and 'day' in day %}
+                    <div class="forecast-card">
+                        <div class="forecast-date">{{ day.date }}</div>
+                        <img src="https:{{ day.day.condition.icon }}" alt="{{ day.day.condition.text }}" class="forecast-icon">
+                        <div class="forecast-temp">
+                            <span class="forecast-high">{{ day.day.maxtemp_c }}°</span>
+                            <span class="forecast-low">{{ day.day.mintemp_c }}°</span>
+                        </div>
+                        <div class="forecast-condition">{{ day.day.condition.text }}</div>
+                        <div class="detail-item">
+                            <div class="detail-label">Chance de Chuva</div>
+                            <div class="detail-value">{{ day.day.daily_chance_of_rain }}%</div>
                         </div>
                     </div>
+                    {% endif %}
                     {% endfor %}
                 </div>
             </div>
         </div>
+        {% elif forecast == None %}
+        <div class="card">
+            <div class="card-header">
+                <h3>Erro ao obter previsão</h3>
+            </div>
+            <div class="card-body">
+                <p class="text-danger">Ocorreu um erro ao buscar a previsão do tempo.</p>
+            </div>
+        </div>
         {% endif %}
     </div>
-</body>
 
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
 </html>
