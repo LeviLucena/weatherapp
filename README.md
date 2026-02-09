@@ -43,25 +43,6 @@
 
 # 🌦️ WeatherApp - Sistema de Previsões Climáticas
 
-## 📋 Índice
-
-- [Visão Geral](#-visão-geral)
-- [Importância do Projeto](#-importância-do-projeto)
-- [Funcionalidades](#-funcionalidades)
-- [Exemplo de Uso](#-exemplo-de-uso)
-- [Estrutura do Projeto](#️-estrutura-do-projeto)
-- [Detalhes dos Dados Geográficos](#-detalhes-dos-dados-geográficos)
-- [Instalação e Configuração](#-instalação-e-configuração)
-- [Como Executar](#-como-executar)
-- [Executando Testes](#-executando-testes)
-- [Tecnologias Utilizadas](#️-tecnologias-utilizadas)
-- [Troubleshooting](#-troubleshooting)
-- [Próximos Passos](#-próximos-passos-e-melhorias)
-- [Licença](#-licença)
-- [Contribuição](#️-contribuição)
-
----
-
 ## ✅ Visão Geral
 
 **WeatherApp** é um sistema web desenvolvido em **Flask** para exibir dados meteorológicos atuais e previsões para municípios brasileiros. O projeto utiliza a [WeatherAPI.com](https://www.weatherapi.com/) para consultar informações do clima, exibindo dados em português de forma clara e acessível para os usuários.
